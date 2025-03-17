@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سعر AIA Chain (AIA)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* التصميم العام */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* الشريط العلوي */
+        .header {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .header button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .header button:hover {
+            background-color: #45a049;
+        }
+
+        /* قسم السعر */
+        .price-section {
+            padding: 20px;
+            background-color: #1a1a1a;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .price-section h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .price-section p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .price-section .note {
+            color: #e33b54;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* قسم العملة */
+        .currency-section {
+            padding: 20px;
+            background-color: #1a1a1a;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .currency-section h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .currency-section p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .currency-section .price-change {
+            color: #4CAF50; /* تغيير اللون إلى الأخضر */
+            font-weight: bold;
+        }
+
+        /* قسم الشارت */
+        .chart-section {
+            padding: 20px;
+            background-color: #1a1a1a;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-section h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        /* قسم معلومات السوق */
+        .market-info {
+            padding: 20px;
+            background-color: #1a1a1a;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .market-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .market-info p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .market-info .highlight {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        /* التصميم المتجاوب للهواتف */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 16px; /* تصغير حجم الخط للشاشات الصغيرة */
+            }
+
+            .header button {
+                padding: 6px 12px; /* تصغير حجم الزر */
+                font-size: 14px;
+            }
+
+            .price-section h2 {
+                font-size: 20px; /* تصغير حجم العنوان */
+            }
+
+            .price-section p, .currency-section p, .market-info p {
+                font-size: 14px; /* تصغير حجم النص */
+            }
+
+            .chart-section canvas {
+                max-width: 100%; /* جعل الشارت يتناسب مع عرض الشاشة */
+            }
+
+            .market-info h3, .currency-section h3, .chart-section h3 {
+                font-size: 18px; /* تصغير حجم العناوين الفرعية */
+            }
+
+            .price-section, .currency-section, .chart-section, .market-info {
+                margin: 10px; /* تقليل الهوامش */
+                padding: 15px; /* تقليل الحشو */
+            }
+        }
+
+        /* البريد الإلكتروني وحقوق الطبع والنشر */
+        .footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #1a1a1a;
+            color: #ccc;
+            font-size: 14px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer .email {
+            opacity: 0.6; /* شفافية البريد الإلكتروني */
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الشريط العلوي -->
+    <div class="header">
+        <div class="flex items-center gap-x-2">
+            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/28449.png" alt="AIA Chain">
+            <h1>سعر AIA Chain (AIA)</h1>
+        </div>
+        <button>مُشاركة</button>
+    </div>
+
+    <!-- قسم السعر -->
+    <div class="price-section">
+        <h2>AIA Chain (AIA) سعر</h2>
+        <p>1 AIA Chain يساوي <strong id="aiaPrice">$0.002306 USD</strong></p>
+        <p class="note">غير مُدرج <span style="color: #4CAF50;">(قريبًا)</span></p>
+        <p class="note">ملاحظة: هذه العملة غير مُدرجة على Binance (بينانس) للتداول والخدمة.</p>
+    </div>
+
+    <!-- قسم العملة -->
+    <div class="currency-section">
+        <h3>العملة: USD-$</h3>
+        <p>1 AIA Chain يساوي <strong id="aiaPrice2">$0.002306 USD</strong></p>
+        <p class="price-change">بينهم USD <span id="priceChange">-4.83%</span></p>
+    </div>
+
+    <!-- قسم الشارت -->
+    <div class="chart-section">
+        <h3>الرسم البياني لسعر AIA Chain</h3>
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <!-- قسم معلومات السوق -->
+    <div class="market-info">
+        <h3>معلومات سوق AIA</h3>
+        <p><span class="highlight">السعر الأعلى خلال 24 ساعة:</span> $0.002481</p>
+        <p><span class="highlight">السعر الأدنى خلال 24 ساعة:</span> $0.002306</p>
+        <p><span class="highlight">مرتفع كل الوقت:</span> $0.036275</p>
+        <p><span class="highlight">تغيّر السعر (1س):</span> 0%</p>
+        <p><span class="highlight">تغيّر السعر (24س):</span> -4.83%</p>
+        <p><span class="highlight">تغيّر السعر (7ي):</span> -5.35%</p>
+        <p><span class="highlight">الشعبية:</span> #5664</p>
+        <p><span class="highlight">القيمة السوقية:</span> $0</p>
+        <p><span class="highlight">الحجم (24 ساعة):</span> $1,080.14</p>
+        <p><span class="highlight">المخزون المتاح للتداول:</span> 0 (0%)</p>
+        <p><span class="highlight">المخزون الإجمالي الأقصى:</span> 13.19B</p>
+        <p><span class="highlight">القيمة السوقية المخفضة بالكامل:</span> $30.42M</p>
+    </div>
+
+    <!-- البريد الإلكتروني وحقوق الطبع والنشر -->
+    <div class="footer">
+        <div class="email">support@binance.com</div>
+        <p>حقوق الطبع والنشر &copy; 2023 Binance. جميع الحقوق محفوظة.</p>
+    </div>
+
+    <script>
+        // دالة لتحديث السعر بشكل عشوائي
+        function updatePrice() {
+            const min = 0.00100;
+            const max = 0.00200;
+            const randomPrice = (Math.random() * (max - min) + min).toFixed(5); // سعر عشوائي بين 0.00100 و 0.00200
+            document.getElementById('aiaPrice').textContent = `$${randomPrice} USD`;
+            document.getElementById('aiaPrice2').textContent = `$${randomPrice} USD`;
+        }
+
+        // دالة لتحديث النسبة المئوية بشكل عشوائي
+        function updatePriceChange() {
+            const min = 20;
+            const max = 40;
+            const randomChange = (Math.random() * (max - min) + min).toFixed(2); // نسبة عشوائية بين 20% و 40%
+            document.getElementById('priceChange').textContent = `${randomChange}%`;
+        }
+
+        // تحديث السعر والنسبة كل 3 ثوانٍ
+        setInterval(updatePrice, 3000);
+        setInterval(updatePriceChange, 3000);
+
+        // بيانات الشارت
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6', '7'],
+                datasets: [{
+                    label: 'سعر AIA/USD',
+                    data: [0.00150, 0.00160, 0.00170, 0.00180, 0.00190, 0.00200, 0.00180],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: '#4CAF50',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: 0.00100, // الحد الأدنى للرسم البياني
+                        suggestedMax: 0.00200, // الحد الأقصى للرسم البياني
+                        title: {
+                            display: true,
+                            text: 'السعر (دولار)'
+                        },
+                        grid: {
+                            color: '#333'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'الفترات الزمنية'
+                        },
+                        grid: {
+                            color: '#333'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+
+        // تحديث الرسم البياني مع السعر الجديد
+        function updateChart(newPrice) {
+            const chartData = priceChart.data.datasets[0].data;
+            chartData.push(newPrice); // إضافة السعر الجديد
+            if (chartData.length > 7) {
+                chartData.shift(); // إزالة أقدم سعر إذا تجاوزت البيانات 7 نقاط
+            }
+            priceChart.update(); // تحديث الرسم البياني
+        }
+
+        // دالة لتحديث السعر والرسم البياني
+        function updatePriceAndChart() {
+            const min = 0.00100;
+            const max = 0.00200;
+            const randomPrice = (Math.random() * (max - min) + min).toFixed(5); // سعر عشوائي بين 0.00100 و 0.00200
+            document.getElementById('aiaPrice').textContent = `$${randomPrice} USD`;
+            document.getElementById('aiaPrice2').textContent = `$${randomPrice} USD`;
+            updateChart(parseFloat(randomPrice)); // تحديث الرسم البياني
+        }
+
+        // تحديث السعر والرسم البياني كل 3 ثوانٍ
+        setInterval(updatePriceAndChart, 3000);
+    </script>
+
+</body>
+</html>

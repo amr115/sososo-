@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شراء AIA - USDT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #000; /* خلفية سوداء */
+            color: #fff; /* لون النص أبيض */
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1a1a1a; /* خلفية داكنة */
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #4CAF50; /* لون العنوان أخضر */
+            margin-bottom: 20px;
+        }
+        .wallet-address {
+            background-color: #2d2d2d; /* خلفية العنوان داكنة */
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            word-break: break-all; /* تجنب انقسام النص */
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        input {
+            padding: 12px;
+            font-size: 16px;
+            width: 200px;
+            border-radius: 5px;
+            border: 1px solid #4CAF50;
+            background-color: #333;
+            color: white;
+            margin: 10px;
+        }
+        .barcode {
+            margin: 30px auto;
+            background-color: white;
+            padding: 20px;
+            width: 300px;
+            border-radius: 10px;
+        }
+        .barcode img {
+            width: 100%;
+            height: auto;
+        }
+        .note {
+            color: #888;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .contact-info {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .contact-info a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>شراء عملة AIA باستخدام USDT</h1>
+        
+        <!-- عنوان المحفظة -->
+        <div class="wallet-address">
+            <h3>عنوان المحفظة:</h3>
+            <p>TGX45Kg2vM7H5gujYkyiubY6usaGRdwjL6</p>
+            <button onclick="copyAddress()">نسخ العنوان</button>
+        </div>
+
+        <!-- آلة حاسبة USDT إلى AIA -->
+        <div class="input-group">
+            <input type="number" id="usdtAmount" placeholder="كمية USDT" oninput="calculateAIA()">
+            <br>
+            <input type="text" id="aiaAmount" placeholder="الكمية المقابلة من AIA" readonly>
+        </div>
+
+        <!-- باركود وهمي -->
+        <div class="barcode">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png" alt="باركود وهمي">
+        </div>
+
+        <!-- زر تأكيد التحويل -->
+        <button onclick="confirmTransfer()">تأكيد التحويل</button>
+
+        <!-- زر خدمة الدعم على Telegram -->
+        <button onclick="openTelegramSupport()">الدعم على Telegram</button>
+
+        <!-- ملاحظات -->
+        <div class="note">
+            <p>1 USDT = 1 دولار = 1000 AIA</p>
+            <p>الحد الأدنى للإيداع: 100 دولار أو أكثر</p>
+            <p>سيتم تنفيذ الصفقة خلال 15 دقيقة من تأكيد التحويل</p>
+            <p>يرجى إرسال المبلغ المطلوب فقط إلى العنوان أعلاه</p>
+        </div>
+
+        <!-- معلومات الاتصال -->
+        <div class="contact-info">
+            <p>للاستفسارات: <a href="mailto:AIA2025@gmail.com">AIA2025@gmail.com</a></p>
+            <p>أرقام التليفون: +1 (555) 123-4567 | +1 (555) 987-6543</p>
+        </div>
+
+        <!-- زر العودة للصفحة الرئيسية -->
+        <button onclick="window.location.href='index.html'">العودة للرئيسية</button>
+    </div>
+
+    <script>
+        function calculateAIA() {
+            const usdt = document.getElementById('usdtAmount').value;
+            const aia = usdt * 1000; // 1 USDT = 1000 AIA
+            document.getElementById('aiaAmount').value = aia.toLocaleString() + ' AIA';
+        }
+
+        function copyAddress() {
+            const text = 'TGX45Kg2vM7H5gujYkyiubY6usaGRdwjL6';
+            navigator.clipboard.writeText(text);
+            alert('تم نسخ العنوان بنجاح!');
+        }
+
+        function confirmTransfer() {
+            const usdt = document.getElementById('usdtAmount').value;
+            const minDeposit = 100; // الحد الأدنى للإيداع
+            if (!usdt || usdt < minDeposit) {
+                alert(`الحد الأدنى للإيداع هو ${minDeposit} دولار`);
+                return;
+            }
+            alert("تم تأكيد التحويل بنجاح! سيتم إكمال العملية خلال 15 دقيقة.");
+        }
+
+        function openTelegramSupport() {
+            const telegramUsername = "AIA2025AIA"; // اسم المستخدم على Telegram
+            const telegramUrl = `https://t.me/${telegramUsername}`; // رابط Telegram
+            window.open(telegramUrl, "_blank"); // فتح الرابط في نافذة جديدة
+        }
+    </script>
+</body>
+</html>

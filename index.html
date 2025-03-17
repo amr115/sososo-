@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تداول AIA/USD</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="translations.js"></script>
+    <style>
+        /* التصميم العام */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            margin: 0;
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1a1a1a;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #4CAF50;
+            margin-right: 10px;
+        }
+
+        .balance-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .balance-item {
+            text-align: center;
+        }
+
+        .balance-item span {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .balance-item p {
+            font-size: 18px;
+            color: #fff;
+            margin: 5px 0 0;
+        }
+
+        .withdraw-button, .logout-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .logout-button {
+            background-color: #f44336;
+        }
+
+        .withdraw-button:hover, .logout-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* القائمة المنسدلة */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-right: 9px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1a1a1a;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 10px;
+            border: 1px solid #4CAF50;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #4CAF50;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-icon {
+            font-size: 24px;
+            cursor: pointer;
+            color: #4CAF50;
+        }
+
+        /* الشريط المتحرك */
+        .notification-bar {
+            position: fixed;
+            top: 50px;
+            left: -100%;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 18px;
+            z-index: 999;
+            animation: slideInOut 5s linear infinite;
+        }
+
+        @keyframes slideInOut {
+            0% { left: -100%; }
+            50% { left: 0; }
+            100% { left: -100%; }
+        }
+
+        /* تصميم مربع حوار البيع */
+        #sell-dialog {
+            display: none;
+            background-color: #2d2d2d;
+            padding: 30px;
+            border-radius: 15px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            border: 2px solid #4CAF50;
+            width: 300px;
+            text-align: center;
+        }
+
+        #sell-dialog h3 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #sell-dialog input {
+            padding: 12px;
+            font-size: 16px;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #4CAF50;
+            background-color: #333;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        #sell-dialog button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        #sell-dialog button:hover {
+            background-color: #45a049;
+        }
+
+        #sell-dialog button.cancel {
+            background-color: #f44336;
+        }
+
+        #sell-dialog button.cancel:hover {
+            background-color: #d32f2f;
+        }
+
+        /* قسم التواصل في أسفل الصفحة */
+        .contact-footer {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-footer h3 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .contact-footer .social-links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .contact-footer .social-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .contact-footer .social-links a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-footer .social-links img {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* تصميم الشارتات */
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #1e1e1e;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* معلومات الاكتتاب */
+        .info-box {
+            max-width: 600px;
+            margin: 80px auto 20px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+        }
+
+        .info-box h2 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .info-box p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* أزرار الشراء والبيع */
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .buttons button {
+            padding: 20px 40px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            width: 45%;
+            max-width: 200px;
+        }
+
+        .buy {
+            background-color: #4CAF50;
+        }
+
+        .sell {
+            background-color: #f44336;
+        }
+
+        .info {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        /* قسم الصورة والمعلومات */
+        .final-section {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .final-section img {
+            width: 120px;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .final-section .text {
+            max-width: 500px;
+            text-align: right;
+        }
+
+        .final-section h3 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .final-section p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* قسم الأسعار المتوقعة */
+        .price-predictions {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+            overflow-x: auto;
+        }
+
+        .price-predictions h3 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .price-predictions table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        .price-predictions th, .price-predictions td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #4CAF50;
+        }
+
+        .price-predictions th {
+            background-color: #2d2d2d;
+            color: #4CAF50;
+        }
+
+        .price-predictions td {
+            background-color: #1a1a1a;
+            color: #ccc;
+        }
+
+        /* تصميم متجاوب للجدول */
+        @media (max-width: 600px) {
+            .price-predictions table {
+                font-size: 14px;
+            }
+
+            .price-predictions th, .price-predictions td {
+                padding: 8px;
+            }
+        }
+
+        /* تنسيق أيقونة الترجمة */
+        .language-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            cursor: pointer;
+            background-color: #1a1a1a;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .language-icon img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%; /* علشان الصورة تظهر بشكل دائري */
+            border: 2px solid #4CAF50; /* إطار أخضر حول الصورة */
+        }
+
+        /* تنسيق قائمة الترجمة */
+        .language-menu {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: #1a1a1a;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .language-menu button {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            margin: 5px 0;
+            background-color: transparent;
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-menu button:hover {
+            background-color: #4CAF50;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* تصميم زر AIA Live مع النقطة الخضراء */
+        .live-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .live-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .live-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: green;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الشريط العلوي -->
+    <div class="top-bar">
+        <!-- القائمة المنسدلة على اليسار -->
+        <div class="dropdown">
+            <div class="dropdown-icon">&#9776;</div>
+            <div class="dropdown-content">
+                <a href="login.html">تسجيل الدخول</a>
+                <a href="register.html">تسجيل</a>
+            </div>
+        </div>
+
+        <!-- الشعار في المنتصف -->
+        <div class="logo">
+            <img src="https://i.ibb.co/jXBpt9x/photo-2024-03-14-17-14-48.jpg" alt="شعار AIA">
+        </div>
+
+        <!-- أرصدة AIA و USDT مع زر سحب الأموال على اليمين -->
+        <div class="balance-container">
+            <div class="balance-item">
+                <span>AIA</span>
+                <p>0.00</p>
+            </div>
+            <div class="balance-item">
+                <span>USDT</span>
+                <p>0.00</p>
+            </div>
+            <button onclick="window.location.href='withdraw.html'" class="withdraw-button">سحب أموال</button>
+        </div>
+    </div>
+
+    <!-- الشريط المتحرك -->
+    <div class="notification-bar" id="notificationBar">
+        <!-- الرسالة الافتراضية -->
+        مرحبًا بك! | Welcome! | Hoş geldiniz! | ¡Bienvenido!
+    </div>
+
+    <!-- مربع معلومات الاكتتاب -->
+    <div class="info-box">
+        <h2 id="ipo-title">معلومات عن الاكتتاب</h2>
+        <p id="ipo-description">
+            الاكتتاب هو عملية بيع أسهم أو عملات رقمية لأول مرة للجمهور. في حالة عملة AIA، يتم الاكتتاب بسعر ثابت قدره 0.001 دولار لكل عملة.
+        </p>
+        <p><strong id="ipo-advantages">مزايا الاكتتاب:</strong></p>
+        <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+            <li id="ipo-advantage1">فرصة للاستثمار في مرحلة مبكرة.</li>
+            <li id="ipo-advantage2">إمكانية تحقيق أرباح كبيرة مع نمو العملة.</li>
+            <li id="ipo-advantage3">دعم مشروع واعد بتقنية حديثة.</li>
+        </ul>
+        <p><strong id="ipo-note">ملاحظة:</strong> الحد الأدنى للإيداع هو 100 دولار.</p>
+
+        <!-- زر AIA Live مع النقطة الخضراء -->
+        <div class="live-container">
+            <button class="live-button" onclick="window.location.href='aia-price.html'">AIA Live</button>
+            <span class="live-dot"></span>
+        </div>
+    </div>
+
+    <!-- قسم معلومات سوق AIA -->
+    <div class="info-box">
+        <h2>معلومات سوق AIA</h2>
+        <div class="info-item">
+            <h3>الشعبية</h3>
+            <p>#5673</p>
+            <p class="note">تعتمد الشعبية على القيمة السوقية النسبية للأصول.</p>
+        </div>
+        <div class="info-item">
+            <h3>القيمة السوقية</h3>
+            <p>$0.002</p>
+            <p class="note">تُحسب القيمة السوقية من خلال ضرب مخزون الأصل المُتاح للتداول في سعره الحالي.</p>
+        </div>
+        <div class="info-item">
+            <h3>الحجم (24 ساعة)</h3>
+            <p>$89801.05</p>
+            <p class="note">القيمة الإجمالية بالدولار الأمريكي لجميع مُعاملات هذا الأصل خلال 24 ساعة الماضية.</p>
+        </div>
+        <div class="info-item">
+            <h3>المخزون المتاح للتداول</h3>
+            <p>0 (66%)</p>
+            <p class="note">عدد العملات المُتداولة في السوق والمُتاحة للتداول للعامة.</p>
+        </div>
+        <div class="info-item">
+            <h3>المخزون الإجمالي الأقصى</h3>
+            <p>13.19B</p>
+            <p class="note">الحد الأقصى لعدد العملات التي سيتم إنشاؤها.</p>
+        </div>
+        <div class="info-item">
+            <h3>القيمة السوقية المخفضة بالكامل</h3>
+            <p>$780.10M</p>
+            <p class="note">الحد الأقصى لعدد العملات التي سيتم إنشاؤها، على غرار الأسهم المخفّضة بالكامل في سوق الأسهم.</p>
+        </div>
+    </div>
+
+    <h1>تداول AIA/USD</h1>
+    <h2 id="current-price">السعر الحالي: جاري التحميل...</h2>
+
+    <!-- أزرار الشراء والبيع -->
+    <div class="buttons">
+        <button class="buy" onclick="window.location.href='purchase.html'">شراء</button>
+        <button class="sell" onclick="openSellDialog()">بيع</button>
+    </div>
+
+    <!-- رسم الشارت الأول (السعر) -->
+    <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <!-- معلومات عن العملة -->
+    <div class="info">
+        <p id="coin-info1">عملة AIA هي عملة رقمية واعدة تتمتع بتقنية حديثة وتطبيقات متنوعة.</p>
+        <p id="coin-info2">تتميز العملة بأمان عالي وسرعة في المعاملات، مما يجعلها خيارًا مثاليًا للمستثمرين.</p>
+    </div>
+
+    <!-- رسم الشارت الثاني (الكمية المعروضة والمباعة) -->
+    <div class="chart-container">
+        <canvas id="volumeChart"></canvas>
+    </div>
+
+    <!-- مربع حوار البيع -->
+    <div id="sell-dialog">
+        <h3 id="sell-dialog-title">بيع AIA</h3>
+        <input type="number" id="sell-amount" placeholder="أدخل الكمية">
+        <button onclick="confirmSell()" id="sell-confirm">تأكيد البيع</button>
+        <button onclick="closeSellDialog()" class="cancel" id="sell-cancel">إلغاء</button>
+    </div>
+
+    <!-- قسم الصورة والمعلومات -->
+    <div class="final-section">
+        <div class="text">
+            <h3 id="future-title">عملة AIA: مستقبل واعد!</h3>
+            <p id="future-description">
+                عملة AIA هي عملة رقمية قوية ومبتكرة، تم تصميمها لتكون واحدة من أقوى العملات في سوق التداول. 
+            </p>
+            <p><strong id="future-steps">المراحل القادمة:</strong></p>
+            <ul style="text-align: right; margin: 10px 0; padding-left: 20px;">
+                <li id="future-step1">سيتم فك العملة يوم <strong>25 مارس 2025</strong>.</li>
+                <li id="future-step2">سيتم فك العملة بالكامل يوم <strong>10 أبريل 2025</strong>.</li>
+                <li id="future-step3">المرحلة الأخيرة ستكون الإدراج على المنصات المركزية مثل <strong>BITGET</strong> و<strong>OKX</strong>.</li>
+            </ul>
+            <p id="future-note">يمكنك بيع العملات بعد يوم <strong>25 مارس 2025</strong> بعد أول فك. استثمر الآن وكن جزءًا من مستقبل العملات الرقمية!</p>
+        </div>
+        <!-- الصورة الجديدة -->
+        <img src="https://i.postimg.cc/BXvJvHfY/openart-image-SCOPNG6-1742101714915-raw.jpg" alt="صورة العملة" style="width: 150px; height: auto;">
+    </div>
+
+    <!-- قسم الأسعار المتوقعة -->
+    <div class="price-predictions">
+        <h3>الأسعار المتوقعة للعملة</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>التاريخ</th>
+                    <th>السعر المتوقع (دولار)</th>
+                    <th>ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>25 مارس 2025</td>
+                    <td>0.001 - 0.020</td>
+                    <td>بداية فك العملة</td>
+                </tr>
+                <tr>
+                    <td>10 أبريل 2025</td>
+                    <td>0.020 - 0.080</td>
+                    <td>تاني مراحل الفك</td>
+                </tr>
+                <tr>
+                    <td>30 أبريل 2025</td>
+                    <td>0.10</td>
+                    <td>ثالث مراحل الفك</td>
+                </tr>
+                <tr>
+                    <td>الإدراج على المنصات</td>
+                    <td>0.50</td>
+                    <td>متوقع وصولها إلى 0.50 دولار</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>يمكن للمستثمرين سحب الأرباح بعد كل مرحلة من مراحل الفك.</p>
+    </div>
+
+    <!-- قسم التواصل في أسفل الصفحة -->
+    <div class="contact-footer">
+        <h3 id="contact-title">تواصل معنا</h3>
+        <p id="contact-email">البريد الإلكتروني: <a href="mailto:AIA2025@gmail.com">AIA2025@gmail.com</a></p>
+        <p id="contact-phone">الهاتف: +1 (555) 123-4567 | +1 (555) 987-6543</p>
+        <div class="social-links">
+            <a href="https://www.facebook.com" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook">
+                Facebook
+            </a>
+            <a href="https://www.instagram.com" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+                Instagram
+            </a>
+            <a href="https://telegram.org" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+                Telegram
+            </a>
+        </div>
+    </div>
+
+    <!-- أيقونة الترجمة الصغيرة -->
+    <div class="language-icon" onclick="toggleLanguageMenu()">
+        <img src="https://i.ibb.co/QvJwFZJ1/choose-translate-icon-translation-globe-change-language-thin-line-symbol-white-background-946691-299.jpg" alt="ترجمة" style="width: 30px; height: 30px; border-radius: 50%;">
+    </div>
+
+    <!-- قائمة الترجمة -->
+    <div class="language-menu" id="languageMenu">
+        <button onclick="changeLanguage('ar')">العربية</button>
+        <button onclick="changeLanguage('en')">English</button>
+        <button onclick="changeLanguage('tr')">Türkçe</button>
+        <button onclick="changeLanguage('es')">Español</button>
+        <button onclick="changeLanguage('fr')">Français</button>
+        <button onclick="changeLanguage('de')">Deutsch</button>
+        <button onclick="changeLanguage('ru')">Русский</button>
+    </div>
+
+    <script>
+        // التحقق من تسجيل الدخول
+        function checkAuth() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const notificationBar = document.getElementById('notificationBar');
+
+            if (loggedInUser) {
+                // إذا كان المستخدم مسجلًا، نعرض رسالة ترحيبية
+                const userEmail = JSON.parse(loggedInUser).email;
+                notificationBar.innerText = `مرحبًا، ${userEmail}! أنت مسجل الدخول حاليًا.`;
+            } else {
+                // إذا لم يكن مسجلًا، نعرض الرسالة الافتراضية
+                notificationBar.innerText = "مرحبًا بك! | Welcome! | Hoş geldiniz! | ¡Bienvenido!";
+            }
+        }
+
+        // دالة تسجيل الخروج
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = "login.html";
+        }
+
+        // وظيفة فتح مربع حوار البيع
+        function openSellDialog() {
+            document.getElementById('sell-dialog').style.display = 'block';
+        }
+
+        // وظيفة إغلاق مربع حوار البيع
+        function closeSellDialog() {
+            document.getElementById('sell-dialog').style.display = 'none';
+        }
+
+        // وظيفة تأكيد البيع
+        function confirmSell() {
+            const amount = document.getElementById('sell-amount').value;
+            if (amount > 0) {
+                alert("لا يوجد عملات لبيع!");
+                closeSellDialog();
+            } else {
+                alert("يرجى إدخال كمية صحيحة!");
+            }
+        }
+
+        // بيانات الشارت الأول (السعر)
+        const priceCtx = document.getElementById('priceChart').getContext('2d');
+        const priceChart = new Chart(priceCtx, {
+            type: 'line',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6', '7'],
+                datasets: [{
+                    label: 'سعر AIA/USD',
+                    data: [0.0001, 0.0004, 0.0007, 0.0012, 0.0015, 0.0020],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: '#4CAF50',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'السعر (دولار)',
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: '#333'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'الفترات الزمنية',
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: '#333'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+
+        // بيانات الشارت الثاني (الكمية المعروضة والمباعة)
+        const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+        const volumeChart = new Chart(volumeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['الكمية المعروضة', 'الكمية المباعة'],
+                datasets: [{
+                    label: 'الكمية',
+                    data: [10000000, 10000],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'الكمية',
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: '#333'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'التصنيفات',
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: '#333'
+                        },
+                        ticks: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+
+        // دالة لإظهار/إخفاء قائمة الترجمة
+        function toggleLanguageMenu() {
+            const languageMenu = document.getElementById('languageMenu');
+            if (languageMenu.style.display === 'block') {
+                languageMenu.style.display = 'none';
+            } else {
+                languageMenu.style.display = 'block';
+            }
+        }
+
+        // إغلاق القائمة عند النقر خارجها
+        window.onclick = function(event) {
+            const languageMenu = document.getElementById('languageMenu');
+            const languageIcon = document.querySelector('.language-icon');
+            if (event.target !== languageIcon && !languageIcon.contains(event.target)) {
+                languageMenu.style.display = 'none';
+            }
+        }
+
+        // استدعاء الوظيفة عند تحميل الصفحة
+        window.onload = () => {
+            checkAuth();
+            changeLanguage('ar'); // تعيين اللغة الافتراضية إلى العربية
+        };
+    </script>
+</body>
+
+</html>
