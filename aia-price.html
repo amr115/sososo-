@@ -261,18 +261,18 @@
     <script>
         // دالة لتحديث السعر بشكل عشوائي
         function updatePrice() {
-            const min = 0.00100;
-            const max = 0.00200;
-            const randomPrice = (Math.random() * (max - min) + min).toFixed(5); // سعر عشوائي بين 0.00100 و 0.00200
+            const min = 0.00300;
+            const max = 0.00400;
+            const randomPrice = (Math.random() * (max - min) + min).toFixed(5); // سعر عشوائي بين 0.00300 و 0.00400
             document.getElementById('aiaPrice').textContent = `$${randomPrice} USD`;
             document.getElementById('aiaPrice2').textContent = `$${randomPrice} USD`;
         }
 
         // دالة لتحديث النسبة المئوية بشكل عشوائي
         function updatePriceChange() {
-            const min = 20;
-            const max = 40;
-            const randomChange = (Math.random() * (max - min) + min).toFixed(2); // نسبة عشوائية بين 20% و 40%
+            const min = 90;
+            const max = 150;
+            const randomChange = (Math.random() * (max - min) + min).toFixed(2); // نسبة عشوائية بين 90% و 150%
             document.getElementById('priceChange').textContent = `${randomChange}%`;
         }
 
@@ -299,8 +299,8 @@
                 scales: {
                     y: {
                         beginAtZero: false,
-                        suggestedMin: 0.00100, // الحد الأدنى للرسم البياني
-                        suggestedMax: 0.00200, // الحد الأقصى للرسم البياني
+                        suggestedMin: 0.00300, // الحد الأدنى للرسم البياني
+                        suggestedMax: 0.00500, // الحد الأقصى للرسم البياني
                         title: {
                             display: true,
                             text: 'السعر (دولار)'
@@ -347,9 +347,9 @@
 
         // دالة لتحديث السعر والرسم البياني
         function updatePriceAndChart() {
-            const min = 0.00100;
-            const max = 0.00200;
-            const randomPrice = (Math.random() * (max - min) + min).toFixed(5); // سعر عشوائي بين 0.00100 و 0.00200
+            const min = 0.00300;
+            const max = 0.00400;
+            const randomPrice = (Math.random() * (max - min) + min).toFixed(5); // سعر عشوائي بين 0.00300 و 0.00400
             document.getElementById('aiaPrice').textContent = `$${randomPrice} USD`;
             document.getElementById('aiaPrice2').textContent = `$${randomPrice} USD`;
             updateChart(parseFloat(randomPrice)); // تحديث الرسم البياني
